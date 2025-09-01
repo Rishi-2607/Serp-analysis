@@ -1,0 +1,14 @@
+build:
+  name: serp-backend
+  env: node
+
+services:
+  - name: serp-backend
+    type: web
+    env: node
+    build:
+      command: npm install
+    start: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
