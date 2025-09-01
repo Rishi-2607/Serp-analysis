@@ -6,12 +6,25 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Enable CORS for all routes
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://serp-analysis.netlify.app',
+
+];
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? 'https://serp-analysis.netlify.app/' 
-    : 'http://localhost:3000',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.error('Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
+
 
 // Parse JSON request body
 app.use(express.json());
@@ -43,11 +56,11 @@ app.get('/api/serp', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch data from SERP API' });
   }
 });
-// app.use(express.static(path.join(__dirname, 'build')));
-// // Catch-all route for SPA (React)
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'build', 'index.html'));
-// });
+app.use(express.static(path.join(__dirname, 'build')));
+// Catch-all route for SPA (React)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Proxy server running on port ${PORT}`);
